@@ -93,11 +93,13 @@ export async function crawlAll() {
   try {
     process.setMaxListeners(20);
     const listUrl: string[] = await crawlUrlActorListFilm();
-    const promises = listUrl.map((url) => crawlCodeFilm(url));
-    const listCodeFilm: any[] = await Promise.all(promises);
-    console.log(listCodeFilm);
+    /* const promises = listUrl.map((url) => crawlCodeFilm(url)); */
+    const listCodeFilm: any[] = [];
+    const listActorName: any[] = await crawlActorName();
+    for (let i = 0; i <= 20; i++) {
+      listCodeFilm.push(await crawlCodeFilm(listUrl[i]));
+    }
 
-    let actorName = "Alex";
     const csvWriter = createObjectCsvWriter({
       path: "csv/code_film.csv",
       header: [
@@ -106,10 +108,18 @@ export async function crawlAll() {
       ],
     });
 
-    const records = listCodeFilm.map((code) => ({
-      actorName: actorName,
-      code: code,
-    }));
+    const records: any = [];
+
+    for (
+      let i = 0;
+      i < Math.min(listActorName.length, listCodeFilm.length);
+      i++
+    ) {
+      const actorName = listActorName[i];
+      const codeArray = listCodeFilm[i]; 
+      records.push({ actorName, code: codeArray.join(", ") }); 
+    }
+
     await csvWriter.writeRecords(records);
 
     return listCodeFilm;
