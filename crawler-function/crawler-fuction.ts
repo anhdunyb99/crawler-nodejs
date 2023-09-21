@@ -23,7 +23,7 @@ export async function crawlActorName() {
   await browser.close();
   return actorName;
 }
-export async function crawlUrlWebsite() {
+export async function crawlUrlActorListFilm() {
   await initializeBrowserAndPage();
   await page.goto("https://madouqu.com/tags/");
   const pageContent = await page.content();
@@ -37,10 +37,9 @@ export async function crawlUrlWebsite() {
   await browser.close();
   return websiteUrl;
 }
-export async function crawlCodeFilm() {
+export async function crawlCodeFilm(nextPageUrl: any) {
   await initializeBrowserAndPage();
   const code: string[] = [];
-  let nextPageUrl: any = "https://madouqu.com/tag/%e5%ad%9f%e8%8b%a5%e7%be%bd/";
 
   while (nextPageUrl) {
     await page.goto(nextPageUrl);
@@ -73,8 +72,8 @@ export async function crawlCodeFilm() {
   }
 
   await browser.close();
-
-  let actorName = "Alex";
+  return code;
+  /* let actorName = "Alex";
   const csvWriter = createObjectCsvWriter({
     path: "csv/code_film.csv",
     header: [
@@ -87,5 +86,36 @@ export async function crawlCodeFilm() {
     actorName: actorName,
     code: code,
   }));
-  await csvWriter.writeRecords(records);
+  await csvWriter.writeRecords(records); */
+}
+
+export async function crawlAll() {
+  try {
+    process.setMaxListeners(20);
+    const listUrl: string[] = await crawlUrlActorListFilm();
+    const promises = listUrl.map((url) => crawlCodeFilm(url));
+    const listCodeFilm: any[] = await Promise.all(promises);
+    console.log(listCodeFilm);
+
+    let actorName = "Alex";
+    const csvWriter = createObjectCsvWriter({
+      path: "csv/code_film.csv",
+      header: [
+        { id: "actorName", title: "Actor Name" },
+        { id: "code", title: "Code film" },
+      ],
+    });
+
+    const records = listCodeFilm.map((code) => ({
+      actorName: actorName,
+      code: code,
+    }));
+    await csvWriter.writeRecords(records);
+
+    return listCodeFilm;
+  } catch (error) {
+    // Xử lý lỗi nếu có
+    console.error(error);
+    return [];
+  }
 }
