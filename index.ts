@@ -1,6 +1,10 @@
-import { crawlActorName } from "./crawler-function/crawlActorName";
+import {
+  crawlActorName,
+  crawlCodeFilm,
+} from "./crawler-function/crawler-fuction";
 async function main() {
-  await crawlActorName();
+  await crawlCodeFilm();
+  /* await crawlActorName(); */
 }
 
 main();
