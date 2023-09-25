@@ -36,6 +36,8 @@ export async function collectLinkFromNavBar() {
 }
 
 export async function crawlDataFromSinglePage(url: string) {
+  console.log(url);
+
   await initializeBrowserAndPage();
   await page.goto(url, { timeout: 60000 });
   const pageContent = await page.content();
@@ -100,7 +102,8 @@ export async function crawlAllFrom91Md() {
   const studioUrls = await collectLinkFromNavBar();
   let data: string[] = [];
   for (const studioUrl of studioUrls) {
-    data = await crawlDataFromSingleStudio(studioUrl);
+    let newData = await crawlDataFromSingleStudio(studioUrl);
+    data.push(...newData);
   }
   /* for (let index = 0; index < 3; index++) {
     data = await crawlDataFromSingleStudio(studioUrls[index]);
